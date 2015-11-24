@@ -16,8 +16,6 @@ from django.core.signals import got_request_exception
 
 from sentry.conf import settings
 
-warnings.warn('sentry.client will be removed in version 1.14.0. You should switch to raven.client.django', DeprecationWarning)
-
 logger = logging.getLogger('sentry.errors')
 
 if settings.SERVERS:
