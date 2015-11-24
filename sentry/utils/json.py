@@ -6,6 +6,7 @@ sentry.utils.json
 :license: BSD, see LICENSE for more details.
 """
 
+from __future__ import absolute_import
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder
