@@ -34,15 +34,20 @@ else:
     from django.db import transaction
 
 _client = (None, None)
+
+
 def get_client():
     global _client
     if _client[0] != settings.CLIENT:
         module, class_name = settings.CLIENT.rsplit('.', 1)
         _client = (settings.CLIENT, getattr(__import__(module, {}, {}, class_name), class_name)())
     return _client[1]
+
+
 client = get_client()
 
-@transaction.commit_on_success
+
+@transaction.atomic
 def sentry_exception_handler(request=None, **kwargs):
     exc_info = sys.exc_info()
     try:
@@ -65,6 +70,7 @@ def sentry_exception_handler(request=None, **kwargs):
             warnings.warn(u'Unable to process log entry: %s' % (exc,))
     finally:
         del exc_info
+
 
 got_request_exception.connect(sentry_exception_handler)
 

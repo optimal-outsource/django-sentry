@@ -73,11 +73,12 @@ def time_limit(silence): # ~ 3600 per hour
         return 60
     return 10000
 
+
 class SentryManager(models.Manager):
     use_for_related_fields = True
 
-    def get_query_set(self):
-        qs = super(SentryManager, self).get_query_set()
+    def get_queryset(self):
+        qs = super(SentryManager, self).get_queryset()
         if settings.DATABASE_USING:
             qs = qs.using(settings.DATABASE_USING)
         return qs

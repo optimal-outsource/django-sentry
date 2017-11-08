@@ -5,9 +5,13 @@ import sys
 try:
     from setuptools import setup, find_packages, Command
 except ImportError:
-    from ez_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup, find_packages, Command
+    try:
+        from ez_setup import use_setuptools
+        use_setuptools()
+        from setuptools import setup, find_packages, Command
+    except ImportError:
+        print >>sys.stderr, 'No setup tools available'
+        sys.exit(1)
 
 tests_require = [
     'nose',
@@ -18,17 +22,13 @@ tests_require = [
 ]
 
 install_requires = [
-    'Django>=1.2',
+    'Django>=1.7',
     'django-paging>=0.2.4',
     'django-indexer>=0.3.0',
     'django-templatetag-sugar>=0.1.0',
     'raven',
     'python-daemon>=1.6',
-    'eventlet>=0.9.15',
-    'south',
-    # haystack support
-    # 'django-haystack',
-    # 'whoosh',
+    'eventlet>=0.9.15'
 ]
 
 if sys.version_info[:2] < (2, 5):
@@ -36,7 +36,7 @@ if sys.version_info[:2] < (2, 5):
 
 setup(
     name='django-sentry',
-    version='1.13.5.1',
+    version='1.13.5.2',
     author='Adam Stein',
     author_email='adam@optimaloutsource.com',
     url='https://github.com/optimal-outsource/django-sentry',
@@ -44,9 +44,6 @@ setup(
     packages=find_packages(exclude=("example_project", "tests")),
     zip_safe=False,
     install_requires=install_requires,
-    # dependency_links=[
-    #     'https://github.com/disqus/django-haystack/tarball/master#egg=django-haystack',
-    # ],
     tests_require=tests_require,
     extras_require={'test': tests_require},
     test_suite='runtests.runtests',
