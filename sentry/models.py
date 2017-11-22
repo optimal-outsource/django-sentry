@@ -49,12 +49,21 @@ FILTER_KEYS = (
 
 logger = logging.getLogger('sentry.errors')
 
+
 class GzippedDictField(models.TextField):
     """
     Slightly different from a JSONField in the sense that the default
     value is a dictionary.
     """
-    __metaclass__ = models.SubfieldBase
+
+    # noinspection PyUnusedLocal
+    def from_db_value(self, value, expression, connection, context):
+        return self.to_python(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return
+        return base64.b64encode(pickle.dumps(transform(value)).encode('zlib'))
 
     def to_python(self, value):
         if isinstance(value, basestring) and value:
@@ -67,33 +76,22 @@ class GzippedDictField(models.TextField):
             return {}
         return value
 
-    def get_prep_value(self, value):
-        if value is None:
-            return
-        return base64.b64encode(pickle.dumps(transform(value)).encode('zlib'))
-
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
-        return self.get_db_prep_value(value)
+        return value
 
-    def south_field_triple(self):
-        "Returns a suitable description of this field for South."
-        from south.modelsinspector import introspector
-        field_class = "django.db.models.fields.TextField"
-        args, kwargs = introspector(self)
-        return (field_class, args, kwargs)
 
 class MessageBase(Model):
-    logger          = models.CharField(max_length=64, blank=True, default='root', db_index=True)
-    class_name      = models.CharField(_('type'), max_length=128, blank=True, null=True, db_index=True)
-    level           = models.PositiveIntegerField(choices=settings.LOG_LEVELS, default=logging.ERROR, blank=True, db_index=True)
-    message         = models.TextField()
-    traceback       = models.TextField(blank=True, null=True)
-    view            = models.CharField(max_length=200, blank=True, null=True)
-    checksum        = models.CharField(max_length=32, db_index=True)
-    data            = GzippedDictField(blank=True, null=True)
+    logger = models.CharField(max_length=64, blank=True, default='root', db_index=True)
+    class_name = models.CharField(_('type'), max_length=128, blank=True, null=True, db_index=True)
+    level = models.PositiveIntegerField(choices=settings.LOG_LEVELS, default=logging.ERROR, blank=True, db_index=True)
+    message = models.TextField()
+    traceback = models.TextField(blank=True, null=True)
+    view = models.CharField(max_length=200, blank=True, null=True)
+    checksum = models.CharField(max_length=32, db_index=True)
+    data = GzippedDictField(blank=True, null=True)
 
-    objects         = SentryManager()
+    objects = SentryManager()
 
     class Meta:
         abstract = True
@@ -114,11 +112,11 @@ class MessageBase(Model):
         sentry_data = data['__sentry__']
 
         if 'exc' in sentry_data:
-            module, args, frames = sentry_data['exc']
+            module_obj, args, frames = sentry_data['exc']
         elif 'exception' in sentry_data:
-            (module, args), frames = sentry_data['exception'], sentry_data.get('frames')
+            (module_obj, args), frames = sentry_data['exception'], sentry_data.get('frames')
         else:
-            module, args, frames = None, None, sentry_data.get('frames')
+            module_obj, args, frames = None, None, sentry_data.get('frames')
 
         if not frames:
             return
@@ -129,7 +127,7 @@ class MessageBase(Model):
             result.append('    %s' % frame['context_line'].strip())
             result.append('')
 
-        if module and args:
+        if module_obj and args:
             result.append('%(class_name)s: %(message)s' % dict(class_name=self.class_name, message=self.message))
 
         return '\n'.join(result)
@@ -156,15 +154,16 @@ class MessageBase(Model):
     def message_top(self):
         return truncatechars(self.message.split('\n')[0], 100)
 
+
 class GroupedMessage(MessageBase):
-    status          = models.PositiveIntegerField(default=0, choices=STATUS_LEVELS, db_index=True)
-    times_seen      = models.PositiveIntegerField(default=1, db_index=True)
-    last_seen       = models.DateTimeField(default=datetime.now, db_index=True)
-    first_seen      = models.DateTimeField(default=datetime.now, db_index=True)
+    status = models.PositiveIntegerField(default=0, choices=STATUS_LEVELS, db_index=True)
+    times_seen = models.PositiveIntegerField(default=1, db_index=True)
+    last_seen = models.DateTimeField(default=datetime.now, db_index=True)
+    first_seen = models.DateTimeField(default=datetime.now, db_index=True)
 
-    score           = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
 
-    objects         = GroupedMessageManager()
+    objects = GroupedMessageManager()
 
     class Meta:
         unique_together = (('logger', 'view', 'checksum'),)
@@ -180,10 +179,10 @@ class GroupedMessage(MessageBase):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('sentry-group', (self.pk,), {})
+        return 'sentry-group', (self.pk,), {}
 
     def natural_key(self):
-        return (self.logger, self.view, self.checksum)
+        return self.logger, self.view, self.checksum
 
     def get_score(self):
         return int(math.log(self.times_seen) * 600 + float(time.mktime(self.last_seen.timetuple())))
@@ -204,10 +203,10 @@ class GroupedMessage(MessageBase):
         subject = '%sError (%s IP): %s' % (settings.EMAIL_SUBJECT_PREFIX, ip_repr, obj_request.path)
 
         if message.site:
-            subject  = '[%s] %s' % (message.site, subject)
+            subject = '[%s] %s' % (message.site, subject)
         try:
             request_repr = repr(obj_request)
-        except:
+        except Exception:
             request_repr = "Request repr() unavailable"
 
         if request:
@@ -256,16 +255,17 @@ class GroupedMessage(MessageBase):
             return
         if 'version' not in self.data:
             return
-        module = self.data.get('module', 'ver')
-        return module, self.data['version']
+        module_obj = self.data.get('module', 'ver')
+        return module_obj, self.data['version']
+
 
 class Message(MessageBase):
-    message_id      = models.CharField(max_length=32, null=True, unique=True)
-    group           = models.ForeignKey(GroupedMessage, blank=True, null=True, related_name="message_set")
-    datetime        = models.DateTimeField(default=datetime.now, db_index=True)
-    url             = models.URLField(null=True, blank=True)
-    server_name     = models.CharField(max_length=128, db_index=True)
-    site            = models.CharField(max_length=128, db_index=True, null=True)
+    message_id = models.CharField(max_length=32, null=True, unique=True)
+    group = models.ForeignKey(GroupedMessage, blank=True, null=True, related_name="message_set")
+    datetime = models.DateTimeField(default=datetime.now, db_index=True)
+    url = models.URLField(null=True, blank=True)
+    server_name = models.CharField(max_length=128, db_index=True)
+    site = models.CharField(max_length=128, db_index=True, null=True)
 
     class Meta:
         verbose_name = _('message')
@@ -282,7 +282,7 @@ class Message(MessageBase):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('sentry-group-message', (self.group_id, self.pk), {})
+        return 'sentry-group-message', (self.group_id, self.pk), {}
 
     def shortened_url(self):
         if not self.url:
@@ -302,12 +302,12 @@ class Message(MessageBase):
     @cached_property
     def request(self):
         fake_request = MockDjangoRequest(
-            META = self.data.get('META') or {},
-            GET = self.data.get('GET') or {},
-            POST = self.data.get('POST') or {},
-            FILES = self.data.get('FILES') or {},
-            COOKIES = self.data.get('COOKIES') or {},
-            url = self.url,
+            META=self.data.get('META') or {},
+            GET=self.data.get('GET') or {},
+            POST=self.data.get('POST') or {},
+            FILES=self.data.get('FILES') or {},
+            COOKIES=self.data.get('COOKIES') or {},
+            url=self.url,
         )
         if self.url:
             fake_request.path_info = '/' + self.url.split('/', 3)[-1]
@@ -323,8 +323,9 @@ class Message(MessageBase):
             return
         if 'version' not in self.data['__sentry__']:
             return
-        module = self.data['__sentry__'].get('module', 'ver')
-        return module, self.data['__sentry__']['version']
+        module_obj = self.data['__sentry__'].get('module', 'ver')
+        return module_obj, self.data['__sentry__']['version']
+
 
 class FilterValue(models.Model):
     """
@@ -338,6 +339,7 @@ class FilterValue(models.Model):
 
     def __unicode__(self):
         return u'key=%s, value=%s' % (self.key, self.value)
+
 
 class MessageFilterValue(models.Model):
     """
@@ -356,6 +358,7 @@ class MessageFilterValue(models.Model):
         return u'group_id=%s, times_seen=%s, key=%s, value=%s' % (self.group_id, self.times_seen,
                                                                   self.key, self.value)
 
+
 class MessageCountByMinute(Model):
     """
     Stores the total number of messages seen by a group at 5 minute intervals
@@ -364,7 +367,7 @@ class MessageCountByMinute(Model):
     """
 
     group = models.ForeignKey(GroupedMessage)
-    date = models.DateTimeField() # normalized to HH:MM:00
+    date = models.DateTimeField()   # normalized to HH:MM:00
     times_seen = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -374,20 +377,23 @@ class MessageCountByMinute(Model):
         return u'group_id=%s, times_seen=%s, date=%s' % (self.group_id, self.times_seen, self.date)
 
 
-### django-indexer
+# django-indexer
 
 class MessageIndex(BaseIndex):
     model = Message
 
-### Helper methods
+# Helper methods
+
 
 def register_indexes():
     """
     Grabs all required indexes from filters and registers them.
     """
-    logger = logging.getLogger('sentry.setup')
+    index_logger = logging.getLogger('sentry.setup')
     for filter_ in get_filters():
         if filter_.column.startswith('data__'):
             MessageIndex.objects.register_index(filter_.column, index_to='group')
-            logger.debug('Registered index for for %s' % filter_.column)
+            index_logger.debug('Registered index for for %s' % filter_.column)
+
+
 register_indexes()

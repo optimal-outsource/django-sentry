@@ -9,8 +9,9 @@ sentry.filters
 # Widget api is pretty ugly
 from __future__ import absolute_import
 
+from collections import OrderedDict
+
 from django.conf import settings as django_settings
-from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.html import escape
 
@@ -91,7 +92,7 @@ class SentryFilter(object):
 
     def get_choices(self):
         from sentry.models import FilterValue
-        return SortedDict((l, l) for l in FilterValue.objects.filter(key=self.column)\
+        return OrderedDict((l, l) for l in FilterValue.objects.filter(key=self.column)\
                                                      .values_list('value', flat=True)\
                                                      .order_by('value'))
 
@@ -116,7 +117,7 @@ class StatusFilter(SentryFilter):
     default = '0'
 
     def get_choices(self):
-        return SortedDict([
+        return OrderedDict([
             (0, 'Unresolved'),
             (1, 'Resolved'),
         ])
@@ -160,7 +161,7 @@ class LevelFilter(SentryFilter):
     column = 'level'
 
     def get_choices(self):
-        return SortedDict((str(k), v) for k, v in settings.LOG_LEVELS)
+        return OrderedDict((str(k), v) for k, v in settings.LOG_LEVELS)
 
     def get_query_set(self, queryset):
         return queryset.filter(level=self.get_value())

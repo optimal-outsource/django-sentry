@@ -15,12 +15,12 @@ import warnings
 import zlib
 
 from django.conf import settings as dj_settings
-from django.core.context_processors import csrf
 from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseForbidden, HttpResponseRedirect, Http404, HttpResponseNotModified, \
     HttpResponseGone
 from django.shortcuts import get_object_or_404
+from django.template.context_processors import csrf
 from django.template.loader import render_to_string
 from django.utils.encoding import smart_str
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
@@ -121,7 +121,6 @@ def login(request):
     else:
         form = AuthenticationForm(request)
         request.session.set_test_cookie()
-
 
     context = csrf(request)
     context.update({

@@ -6,15 +6,15 @@ sentry.web.urls
 :license: BSD, see LICENSE for more details.
 """
 
-import re
-
-from django.conf.urls import *
+from django.conf.urls import url
 from django.views.defaults import page_not_found
 
-from sentry.conf.settings import KEY
 from sentry.web import views, feeds
 
-handler404 = lambda x: page_not_found(x, template_name='sentry/404.html')
+
+def handler404(request):
+    page_not_found(request, template_name='sentry/404.html')
+
 
 def handler500(request):
     """
@@ -31,7 +31,8 @@ def handler500(request):
     t = loader.get_template('sentry/500.html')
     return HttpResponseServerError(t.render(Context(context)))
 
-urlpatterns = patterns('',
+
+urlpatterns = [
     url(r'^_static/(?P<path>.*)$', views.static_media, name='sentry-media'),
 
     # Feeds
@@ -56,4 +57,4 @@ urlpatterns = patterns('',
     url(r'^search$', views.search, name='sentry-search'),
 
     url(r'^$', views.index, name='sentry'),
-)
+]
