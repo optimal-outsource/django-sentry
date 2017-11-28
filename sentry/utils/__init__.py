@@ -253,8 +253,12 @@ def get_versions(module_list=None):
     versions = {}
     for module_name in ext_module_list:
         if module_name not in _VERSION_CACHE:
-            __import__(module_name)
-            app = sys.modules[module_name]
+            try:
+                __import__(module_name)
+            except ImportError:
+                continue
+            else:
+                app = sys.modules[module_name]
             if hasattr(app, 'get_version'):
                 get_version = app.get_version
                 if callable(get_version):

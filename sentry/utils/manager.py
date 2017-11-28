@@ -87,7 +87,7 @@ class SentryManager(models.Manager):
     def from_kwargs(self, **kwargs):
         from sentry.models import Message, GroupedMessage, FilterValue
 
-        URL_MAX_LENGTH = Message._meta.get_field_by_name('url')[0].max_length
+        URL_MAX_LENGTH = Message._meta.get_field('url').max_length
         now = kwargs.pop('timestamp', None) or datetime.datetime.now()
 
         view = kwargs.pop('view', None)
@@ -144,12 +144,12 @@ class SentryManager(models.Manager):
                     times_seen=F('times_seen') + 1,
                     status=0,
                     last_seen=now,
-                    score=ScoreClause(group),
+                    score=group.get_score()
                 )
                 signals.post_save.send(sender=GroupedMessage, instance=group, created=False)
             else:
                 GroupedMessage.objects.filter(pk=group.pk).update(
-                    score=ScoreClause(group),
+                    score=group.get_score()
                 )
                 silence = 0
                 mail = True

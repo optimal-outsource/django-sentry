@@ -20,14 +20,7 @@ logger = logging.getLogger('sentry.errors')
 
 if settings.SERVERS:
     class MockTransaction(object):
-        def commit_on_success(self, func):
-            return func
-
-        def is_dirty(self):
-            return False
-
-        def rollback(self):
-            pass
+        pass
 
     transaction = MockTransaction()
 else:
@@ -55,15 +48,12 @@ def sentry_exception_handler(request=None, **kwargs):
         if settings.DEBUG or getattr(exc_info[0], 'skip_sentry', False):
             return
 
-        if transaction.is_dirty():
-            transaction.rollback()
-
         extra = dict(
             request=request,
         )
 
         message_id = get_client().create_from_exception(**extra)
-    except Exception, exc:
+    except Exception as exc:
         try:
             logger.exception(u'Unable to process log entry: %s' % (exc,))
         except Exception, exc:
