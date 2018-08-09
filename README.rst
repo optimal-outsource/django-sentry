@@ -7,6 +7,6 @@ default, it will catch any exception thrown by Django and store it in a database
 it allows you to interact and view near real-time information to discover issues and more
 easily trace them in your application.
 
-This is a fork of the original django-sentry 1.13.5 and updated for Django 1.11.
+This is a fork of the original django-sentry 1.13.5 and updated for Django 1.11.x.
 
 If upgrading from an older version, apply the migrations.

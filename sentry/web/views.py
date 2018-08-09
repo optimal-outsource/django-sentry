@@ -238,7 +238,7 @@ def index(request):
 @csrf_exempt
 @login_required
 def ajax_handler(request):
-    op = request.REQUEST.get('op')
+    op = request.GET.get('op', '')
 
     def notification(request):
         return render_to_response('sentry/partial/_notification.html', request.GET)
@@ -286,7 +286,7 @@ def ajax_handler(request):
         return response
 
     def resolve(request):
-        gid = request.REQUEST.get('gid')
+        gid = request.GET.get('gid')
         if not gid:
             return HttpResponseForbidden()
         try:
@@ -325,7 +325,7 @@ def ajax_handler(request):
         return response
 
     def chart(request):
-        gid = request.REQUEST.get('gid')
+        gid = request.GET.get('gid')
         if not gid:
             return HttpResponseForbidden()
 
