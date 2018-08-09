@@ -1,7 +1,6 @@
 # XXX: Import django-paging's template tags so we dont have to worry about
 #      INSTALLED_APPS
 from django import template
-from django.template import RequestContext
 from django.template.defaultfilters import stringfilter
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -175,9 +174,8 @@ truncatechars.is_safe = True
                 Optional([Variable('is_endless')])])
 def paginate(context, queryset_or_list, request, asvar, per_page=25, is_endless=True):
     """{% paginate queryset_or_list from request as foo[ per_page 25][ is_endless False %}"""
-    context_instance = RequestContext(request)
     paging_context = paginate_func(request, queryset_or_list, per_page, endless=is_endless)
-    paging = mark_safe(render_to_string('sentry/partial/_pager.html', paging_context, context_instance))
+    paging = mark_safe(render_to_string('sentry/partial/_pager.html', paging_context, request))
 
     result = dict(objects=paging_context['paginator'].get('objects', []), paging=paging)
     if asvar:

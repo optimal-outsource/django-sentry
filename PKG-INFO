@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: django-sentry
-Version: 1.13.5.1
+Version: 1.13.5.5
 Summary: Exception Logging to a Database in Django
 Home-page: https://github.com/optimal-outsource/django-sentry
 Author: Adam Stein (original auther David Cramer)
