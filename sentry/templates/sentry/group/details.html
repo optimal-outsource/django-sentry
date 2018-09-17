@@ -171,7 +171,7 @@
                                 </thead>
                                 <tbody>
                                 {% if frame.vars %}
-                                  {% for var in frame.vars|dictsort:"0" %}
+                                  {% for var in frame.vars %}
                                     <tr>
                                       <td>{{ var.0|escape }}</td>
                                       <td class="code"><pre>{{ var.1|pprint|escape }}</pre></td>

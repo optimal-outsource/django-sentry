@@ -134,7 +134,7 @@ def get_stack_info(frames):
                 'function': function,
                 'lineno': lineno + 1,
                 # TODO: vars need to be references
-                'vars': transform(frame.f_locals.items()),
+                'vars': transform(sorted(frame.f_locals.items(), key=lambda tup: tup[0])),
                 'pre_context': pre_context,
                 'context_line': context_line,
                 'post_context': post_context,
