@@ -71,8 +71,8 @@ def settings_from_file(filename, silent=False):
     mod = imp.new_module('config')
     mod.__file__ = filename
     try:
-        execfile(filename, mod.__dict__)
-    except IOError, e:
+        exec(compile(open(filename, "rb").read(), filename, 'exec'), mod.__dict__)
+    except IOError as e:
         if silent and e.errno in (errno.ENOENT, errno.EISDIR):
             return False
         e.strerror = 'Unable to load configuration file (%s)' % e.strerror
@@ -86,13 +86,13 @@ def settings_from_file(filename, silent=False):
     for setting in dir(mod):
         if setting == setting.upper():
             setting_value = getattr(mod, setting)
-            if setting in tuple_settings and type(setting_value) == str:
+            if setting in tuple_settings and isinstance(setting_value, str):
                 setting_value = (setting_value,) # In case the user forgot the comma.
             setattr(django_settings, setting, setting_value)
 
 class SentryServer(DaemonRunner):
     pidfile_timeout = 10
-    start_message = u"started with pid %(pid)d"
+    start_message = "started with pid %(pid)d"
 
     def __init__(self, host=None, port=None, pidfile=None,
                  logfile=None, daemonize=False, debug=False):
@@ -188,7 +188,7 @@ def cleanup(days=30, logger=None, site=None, server=None, level=None):
 
     groups_to_check = set()
     for obj in RangeQuerySetWrapper(qs):
-        print ">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk)
+        print(">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk))
         obj.delete()
         groups_to_check.add(obj.group_id)
 
@@ -201,7 +201,7 @@ def cleanup(days=30, logger=None, site=None, server=None, level=None):
             qs = qs.filter(group__level__gte=level)
 
         for obj in RangeQuerySetWrapper(qs):
-            print ">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk)
+            print(">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk))
             obj.delete()
 
         # GroupedMessage
@@ -214,9 +214,9 @@ def cleanup(days=30, logger=None, site=None, server=None, level=None):
         for obj in RangeQuerySetWrapper(qs):
             for key, value in SkinnyQuerySet(MessageFilterValue).filter(group=obj).values_list('key', 'value'):
                 if not MessageFilterValue.objects.filter(key=key, value=value).exclude(group=obj).exists():
-                    print ">>> Removing <FilterValue: key=%s, value=%s>" % (key, value)
+                    print(">>> Removing <FilterValue: key=%s, value=%s>" % (key, value))
                     FilterValue.objects.filter(key=key, value=value).delete()
-            print ">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk)
+            print(">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk))
             obj.delete()
 
     # attempt to cleanup any groups that may now be empty
@@ -229,9 +229,9 @@ def cleanup(days=30, logger=None, site=None, server=None, level=None):
         for obj in SkinnyQuerySet(GroupedMessage).filter(pk__in=groups_to_delete):
             for key, value in SkinnyQuerySet(MessageFilterValue).filter(group=obj).values_list('key', 'value'):
                 if not MessageFilterValue.objects.filter(key=key, value=value).exclude(group=obj).exists():
-                    print ">>> Removing <FilterValue: key=%s, value=%s>" % (key, value)
+                    print(">>> Removing <FilterValue: key=%s, value=%s>" % (key, value))
                     FilterValue.objects.filter(key=key, value=value).delete()
-            print ">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk)
+            print(">>> Removing <%s: id=%s>" % (obj.__class__.__name__, obj.pk))
             obj.delete()
 
 def upgrade(interactive=True):
@@ -246,11 +246,11 @@ def main():
     command_list = ('start', 'stop', 'restart', 'cleanup', 'upgrade')
     args = sys.argv
     if len(args) < 2 or args[1] not in command_list:
-        print "usage: sentry [command] [options]"
-        print
-        print "Available subcommands:"
+        print("usage: sentry [command] [options]")
+        print()
+        print("Available subcommands:")
         for cmd in command_list:
-            print "  ", cmd
+            print("  ", cmd)
         sys.exit(1)
 
     parser = OptionParser(version="%%prog %s" % VERSION)
@@ -289,8 +289,8 @@ def main():
     if not os.path.exists(config_path):
         try:
             copy_default_settings(config_path)
-        except OSError, e:
-            raise e.__class__, 'Unable to write default settings file to %r' % config_path
+        except OSError as e:
+            raise e.__class__('Unable to write default settings file to %r' % config_path)
 
     settings_from_file(config_path)
 

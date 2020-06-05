@@ -24,7 +24,7 @@ class PluginMount(type):
             cls.slug = getattr(cls, 'slug', None) or cls.title.replace(' ', '-').lower()
             cls.plugins[cls.slug] = cls
 
-class ActionProvider:
+class ActionProvider(metaclass=PluginMount):
     """
     Base interface for adding action providers.
 
@@ -40,7 +40,6 @@ class ActionProvider:
     
     ========  ========================================================
     """
-    __metaclass__ = PluginMount
 
     def __init__(self):
         self.url = reverse('sentry-plugin-action', args=(self.slug,))
@@ -52,11 +51,9 @@ class ActionProvider:
 
         return self.perform(request)
 
-class GroupActionProvider:
+class GroupActionProvider(metaclass=PluginMount):
     # TODO: should be able to specify modal support
 
-    __metaclass__ = PluginMount
-    
     new_window = False
 
     @classmethod

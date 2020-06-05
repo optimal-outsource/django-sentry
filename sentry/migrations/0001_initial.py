@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import models, migrations
 import sentry.models
@@ -115,22 +115,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='messageindex',
-            unique_together=set([('column', 'value', 'object_id')]),
+            unique_together={('column', 'value', 'object_id')},
         ),
         migrations.AlterUniqueTogether(
             name='messagefiltervalue',
-            unique_together=set([('key', 'value', 'group')]),
+            unique_together={('key', 'value', 'group')},
         ),
         migrations.AlterUniqueTogether(
             name='messagecountbyminute',
-            unique_together=set([('group', 'date')]),
+            unique_together={('group', 'date')},
         ),
         migrations.AlterUniqueTogether(
             name='groupedmessage',
-            unique_together=set([('logger', 'view', 'checksum')]),
+            unique_together={('logger', 'view', 'checksum')},
         ),
         migrations.AlterUniqueTogether(
             name='filtervalue',
-            unique_together=set([('key', 'value')]),
+            unique_together={('key', 'value')},
         ),
     ]

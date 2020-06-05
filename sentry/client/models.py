@@ -6,7 +6,7 @@ sentry.client.models
 :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import absolute_import
+
 
 import sys
 import logging
@@ -55,9 +55,9 @@ def sentry_exception_handler(request=None, **kwargs):
         message_id = get_client().create_from_exception(**extra)
     except Exception as exc:
         try:
-            logger.exception(u'Unable to process log entry: %s' % (exc,))
-        except Exception, exc:
-            warnings.warn(u'Unable to process log entry: %s' % (exc,))
+            logger.exception('Unable to process log entry: %s' % (exc,))
+        except Exception as exc:
+            warnings.warn('Unable to process log entry: %s' % (exc,))
     finally:
         del exc_info
 

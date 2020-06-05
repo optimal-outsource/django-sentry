@@ -56,7 +56,7 @@ def get_login_url(reset=False):
     return _LOGIN_URL
 
 def iter_data(obj):
-    for k, v in obj.data.iteritems():
+    for k, v in obj.data.items():
         if k.startswith('_') or k in ['url']:
             continue
         yield k, v
@@ -390,7 +390,7 @@ def group(request, group_id):
             template_info = get_template_info(sentry_data['template'], exc_value)
 
         if 'versions' in sentry_data:
-            version_data = sorted(sentry_data['versions'].iteritems())
+            version_data = sorted(sentry_data['versions'].items())
 
     if frames:
         lastframe = frames[-1]
@@ -467,7 +467,7 @@ def group_message_details(request, group_id, message_id):
             template_info = get_template_info(sentry_data['template'], exc_value)
 
         if 'versions' in sentry_data:
-            version_data = sorted(sentry_data['versions'].iteritems())
+            version_data = sorted(sentry_data['versions'].items())
 
     if frames:
         lastframe = frames[-1]
@@ -544,7 +544,7 @@ def store(request):
             data = base64.b64decode(data).decode('zlib')
         except zlib.error:
             data = base64.b64decode(data)
-    except Exception, e:
+    except Exception as e:
         # This error should be caught as it suggests that there's a
         # bug somewhere in the client's code.
         logger.exception('Bad data received')
@@ -555,14 +555,14 @@ def store(request):
             data = pickle.loads(data)
         elif format == 'json':
             data = json.loads(data)
-    except Exception, e:
+    except Exception as e:
         # This error should be caught as it suggests that there's a
         # bug somewhere in the client's code.
         logger.exception('Bad data received')
         return HttpResponseForbidden('Bad data reconstructing object (%s, %s)' % (e.__class__.__name__, e))
 
     # XXX: ensure keys are coerced to strings
-    data = dict((smart_str(k), v) for k, v in data.iteritems())
+    data = dict((smart_str(k), v) for k, v in data.items())
 
     if 'timestamp' in data:
         if is_float(data['timestamp']):
@@ -612,11 +612,11 @@ def static_media(request, path):
     import os.path
     import posixpath
     import stat
-    import urllib
+    import urllib.request, urllib.parse, urllib.error
 
     document_root = os.path.join(settings.ROOT, 'static')
 
-    path = posixpath.normpath(urllib.unquote(path))
+    path = posixpath.normpath(urllib.parse.unquote(path))
     path = path.lstrip('/')
     newpath = ''
     for part in path.split('/'):

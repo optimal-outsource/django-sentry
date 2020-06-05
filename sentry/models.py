@@ -6,7 +6,7 @@ sentry.models
 :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import absolute_import
+
 
 import base64
 import logging
@@ -17,7 +17,7 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Sum
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
 from sentry.conf import settings
@@ -66,10 +66,11 @@ class GzippedDictField(models.TextField):
         return base64.b64encode(pickle.dumps(transform(value)).encode('zlib'))
 
     def to_python(self, value):
-        if isinstance(value, basestring) and value:
+        if isinstance(value, str) and value:
             try:
-                value = pickle.loads(base64.b64decode(value).decode('zlib'))
-            except Exception, e:
+                import zlib
+                value = pickle.loads(zlib.decompress(base64.b64decode(value)))
+            except Exception as e:
                 logger.exception(e)
                 return {}
         elif not value:
@@ -134,7 +135,7 @@ class MessageBase(Model):
 
     def error(self):
         if self.message:
-            message = smart_unicode(self.message)
+            message = smart_text(self.message)
             if len(message) > 100:
                 message = message[:97] + '...'
             if self.class_name:
@@ -338,7 +339,7 @@ class FilterValue(models.Model):
         unique_together = (('key', 'value'),)
 
     def __unicode__(self):
-        return u'key=%s, value=%s' % (self.key, self.value)
+        return 'key=%s, value=%s' % (self.key, self.value)
 
 
 class MessageFilterValue(models.Model):
@@ -355,7 +356,7 @@ class MessageFilterValue(models.Model):
         unique_together = (('key', 'value', 'group'),)
 
     def __unicode__(self):
-        return u'group_id=%s, times_seen=%s, key=%s, value=%s' % (self.group_id, self.times_seen,
+        return 'group_id=%s, times_seen=%s, key=%s, value=%s' % (self.group_id, self.times_seen,
                                                                   self.key, self.value)
 
 
@@ -374,7 +375,7 @@ class MessageCountByMinute(Model):
         unique_together = (('group', 'date'),)
 
     def __unicode__(self):
-        return u'group_id=%s, times_seen=%s, date=%s' % (self.group_id, self.times_seen, self.date)
+        return 'group_id=%s, times_seen=%s, date=%s' % (self.group_id, self.times_seen, self.date)
 
 
 # django-indexer

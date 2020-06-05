@@ -20,8 +20,8 @@ from sentry.plugins.sentry_redmine import conf
 from sentry.utils import json
 
 import base64
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 class RedmineIssue(models.Model):
     group = models.ForeignKey(GroupedMessage)
@@ -52,7 +52,7 @@ class CreateRedmineIssue(GroupActionProvider):
                 })
                 url = conf.REDMINE_URL + '/projects/' + conf.REDMINE_PROJECT_SLUG + '/issues.json'
                 
-                req = urllib2.Request(url, urllib.urlencode({
+                req = urllib.request.Request(url, urllib.parse.urlencode({
                     'key': conf.REDMINE_API_KEY,
                 }), headers={
                     'Content-type': 'application/json',
@@ -63,20 +63,20 @@ class CreateRedmineIssue(GroupActionProvider):
                     req.add_header("Authorization", "Basic %s" % authstring)
                 
                 try:
-                    response = urllib2.urlopen(req, data).read()
-                except urllib2.HTTPError, e:
+                    response = urllib.request.urlopen(req, data).read()
+                except urllib.error.HTTPError as e:
                     if e.code == 422:
                         data = json.loads(e.read())
                         form.errors['__all__'] = 'Missing or invalid data'
                         for message in data:
-                            for k, v in message.iteritems():
+                            for k, v in message.items():
                                 if k in form.fields:
                                     form.errors.setdefault(k, []).append(v)
                                 else:
                                     form.errors['__all__'] += '; %s: %s' % (k, v)
                     else:
                         form.errors['__all__'] = 'Bad response from Redmine: %s %s' % (e.code, e.msg)
-                except urllib2.URLError, e:
+                except urllib.error.URLError as e:
                     form.errors['__all__'] = 'Unable to reach Redmine host: %s' % (e.reason,)
                 else:
                     data = json.loads(response)

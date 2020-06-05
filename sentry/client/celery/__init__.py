@@ -6,4 +6,4 @@ sentry.client.celery
 :license: BSD, see LICENSE for more details.
 """
 
-from client import CelerySentryClient
+from .client import CelerySentryClient

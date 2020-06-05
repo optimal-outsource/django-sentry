@@ -20,9 +20,9 @@ def pprint(value, break_after=10):
     """A wrapper around pprint.pprint -- for debugging, really."""
     from pprint import pformat
 
-    value = pformat(value).decode('utf-8', 'replace')
+    value = pformat(value)
 
-    return u'\u200B'.join([value[i:i+break_after] for i in xrange(0, len(value), break_after)])
+    return '\u200B'.join([value[i:i+break_after] for i in range(0, len(value), break_after)])
 
 # seriously Django?
 @register.filter
@@ -102,7 +102,7 @@ def sentry_version():
 @register.filter
 def get_actions(group, request):
     action_list = []
-    for cls in GroupActionProvider.plugins.itervalues():
+    for cls in GroupActionProvider.plugins.values():
         inst = cls(group.pk)
         action_list = inst.actions(request, action_list, group)
     for action in action_list:
@@ -111,7 +111,7 @@ def get_actions(group, request):
 @register.filter
 def get_panels(group, request):
     panel_list = []
-    for cls in GroupActionProvider.plugins.itervalues():
+    for cls in GroupActionProvider.plugins.values():
         inst = cls(group.pk)
         panel_list = inst.panels(request, panel_list, group)
     for panel in panel_list:
@@ -119,7 +119,7 @@ def get_panels(group, request):
 
 @register.filter
 def get_widgets(group, request):
-    for cls in GroupActionProvider.plugins.itervalues():
+    for cls in GroupActionProvider.plugins.values():
         inst = cls(group.pk)
         resp = inst.widget(request, group)
         if resp:
@@ -128,7 +128,7 @@ def get_widgets(group, request):
 @register.filter
 def get_tags(group, request):
     tag_list = []
-    for cls in GroupActionProvider.plugins.itervalues():
+    for cls in GroupActionProvider.plugins.values():
         inst = cls(group.pk)
         tag_list = inst.tags(request, tag_list, group)
     for tag in tag_list:

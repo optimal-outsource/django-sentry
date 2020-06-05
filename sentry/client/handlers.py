@@ -22,17 +22,17 @@ class SentryHandler(logging.Handler):
 
         # Avoid typical config issues by overriding loggers behavior
         if record.name == 'sentry.errors':
-            print >> sys.stderr, "Recursive log message sent to SentryHandler"
-            print >> sys.stderr, record.message
+            print("Recursive log message sent to SentryHandler", file=sys.stderr)
+            print(record.message, file=sys.stderr)
             return
 
         self.format(record)
         try:
             get_client().create_from_record(record, request=request)
         except Exception:
-            print >> sys.stderr, "Top level Sentry exception caught - failed creating log record"
-            print >> sys.stderr, record.msg
-            print >> sys.stderr, traceback.format_exc()
+            print("Top level Sentry exception caught - failed creating log record", file=sys.stderr)
+            print(record.msg, file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
             return
 
 try:
@@ -48,8 +48,8 @@ else:
 
             # Avoid typical config issues by overriding loggers behavior
             if record.name == 'sentry.errors':
-                print >> sys.stderr, "Recursive log message sent to SentryHandler"
-                print >> sys.stderr, record.message
+                print("Recursive log message sent to SentryHandler", file=sys.stderr)
+                print(record.message, file=sys.stderr)
                 return
 
             kwargs = dict(

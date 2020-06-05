@@ -19,7 +19,7 @@ class MessageFeed(object):
             'title': self.get_title(request),
             'link': request.build_absolute_uri(self.get_link(request)),
             'description': '',
-            'language': u'en',
+            'language': 'en',
             'feed_url': request.build_absolute_uri(),
         }
         feed = feedgenerator.Rss201rev2Feed(**feed_dict)

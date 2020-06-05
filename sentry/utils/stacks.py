@@ -61,7 +61,7 @@ def get_lines_from_file(filename, lineno, context_lines, loader=None, module_nam
         if match:
             encoding = match.group(1)
             break
-    source = [unicode(sline, encoding, 'replace') for sline in source]
+    source = [str(sline, encoding, 'replace') for sline in source]
 
     lower_bound = max(0, lineno - context_lines)
     upper_bound = lineno + context_lines
@@ -134,7 +134,7 @@ def get_stack_info(frames):
                 'function': function,
                 'lineno': lineno + 1,
                 # TODO: vars need to be references
-                'vars': transform(sorted(frame.f_locals.items(), key=lambda tup: tup[0])),
+                'vars': transform(sorted(list(frame.f_locals.items()), key=lambda tup: tup[0])),
                 'pre_context': pre_context,
                 'context_line': context_line,
                 'post_context': post_context,

@@ -203,12 +203,12 @@ class SentryManager(models.Manager):
                         times_seen=1,
                     )
 
-        except Exception, exc:
+        except Exception as exc:
             # TODO: should we mail admins when there are failures?
             try:
-                logger.exception(u'Unable to process log entry: %s' % (exc,))
-            except Exception, exc:
-                warnings.warn(u'Unable to process log entry: %s' % (exc,))
+                logger.exception('Unable to process log entry: %s' % (exc,))
+            except Exception as exc:
+                warnings.warn('Unable to process log entry: %s' % (exc,))
         else:
             if mail and should_mail(group):
                 regression_signal.send(sender=GroupedMessage, instance=group)
@@ -258,4 +258,4 @@ class GroupedMessageManager(SentryManager):
         while not rows.get(today - datetime.timedelta(hours=first_seen)) and first_seen > 24:
             first_seen -= 1
 
-        return [rows.get(today-datetime.timedelta(hours=d), 0) for d in xrange(first_seen, -1, -1)]
+        return [rows.get(today-datetime.timedelta(hours=d), 0) for d in range(first_seen, -1, -1)]

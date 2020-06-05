@@ -226,7 +226,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for k_, v_ in user_data.iteritems|as_sorted %}
+                                            {% for k_, v_ in user_data.items|as_sorted %}
                                             <tr>
                                                 <td>{{ k_ }}</td>
                                                 <td class="code"><pre>{{ v_|pprint }}</pre></td>
@@ -251,7 +251,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for k_, v_ in v.iteritems|as_sorted %}
+                                                {% for k_, v_ in v.items|as_sorted %}
                                                 <tr>
                                                     <td>{{ k_ }}</td>
                                                     <td class="code"><pre>{{ v_|pprint }}</pre></td>
@@ -294,7 +294,7 @@
 
         $.ajax({
             url: Sentry.options.apiUrl,
-            type: 'post',
+            type: 'get',
             dataType: 'json',
             data: {
                 op: 'chart',

@@ -7,7 +7,7 @@ sentry.filters
 """
 
 # Widget api is pretty ugly
-from __future__ import absolute_import
+
 
 from collections import OrderedDict
 
@@ -46,8 +46,8 @@ class ChoiceWidget(Widget):
             label=self.filter.label,
             column=column,
         ))
-        for key, val in choices.iteritems():
-            key = unicode(key)
+        for key, val in choices.items():
+            key = str(key)
             output.append('<li%(active)s rel="%(key)s"><a href="%(query_string)s&amp;%(column)s=%(key)s">%(value)s</a></li>' % dict(
                 active=value == key and ' class="active"' or '',
                 column=column,

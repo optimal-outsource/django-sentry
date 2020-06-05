@@ -6,7 +6,7 @@ sentry.client.async
 :license: BSD, see LICENSE for more details.
 """
 
-from Queue import Queue
+from queue import Queue
 from sentry.client.base import SentryClient
 from threading import Thread, Lock
 import atexit
@@ -50,7 +50,7 @@ class AsyncSentryClient(SentryClient):
             self._lock.release()
 
     def _target(self):
-        while 1:
+        while True:
             record = self.queue.get()
             if record is self._terminator:
                 break
@@ -67,10 +67,10 @@ def main_thread_terminated():
     if isinstance(client, AsyncSentryClient):
         size = client.queue.qsize()
         if size:
-            print "Sentry attempts to send %s error messages" % size
-            print "Waiting up to %s seconds" % SENTRY_WAIT_SECONDS
+            print("Sentry attempts to send %s error messages" % size)
+            print("Waiting up to %s seconds" % SENTRY_WAIT_SECONDS)
             if os.name == 'nt':
-                print "Press Ctrl-Break to quit"
+                print("Press Ctrl-Break to quit")
             else:
-                print "Press Ctrl-C to quit"
+                print("Press Ctrl-C to quit")
             client.stop(timeout = SENTRY_WAIT_SECONDS)

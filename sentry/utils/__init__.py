@@ -15,17 +15,20 @@ except ImportError:
 import sys
 import uuid
 from pprint import pformat
-from types import ClassType, TypeType
 from hashlib import md5, sha1
+import types
 
 import django
 from django.conf import settings as django_settings
 from django.http import HttpRequest
-from django.utils.encoding import force_unicode
 from django.utils.functional import Promise
 
 import sentry
 from sentry.conf import settings
+
+
+class _C:
+    def _m(self): pass
 
 _FILTER_CACHE = None
 def get_filters():
@@ -73,7 +76,7 @@ def construct_checksum(level=logging.ERROR, class_name='', traceback='', message
         traceback = '\n'.join(traceback.split('\n')[:-3])
 
     elif message:
-        if isinstance(message, unicode):
+        if isinstance(message, str):
             message = message.encode('utf-8', 'replace')
         checksum.update(message)
 
@@ -87,7 +90,7 @@ def varmap(func, var, context=None):
         return func('<...>')
     context[objid] = 1
     if isinstance(var, dict):
-        ret = dict((k, varmap(func, v, context)) for k, v in var.iteritems())
+        ret = dict((k, varmap(func, v, context)) for k, v in var.items())
     elif isinstance(var, (list, tuple)):
         ret = [varmap(func, f, context) for f in var]
     else:
@@ -124,15 +127,15 @@ def transform(value, stack=[], context=None):
     elif isinstance(value, uuid.UUID):
         ret = repr(value)
     elif isinstance(value, dict):
-        ret = dict((str(k), transform_rec(v)) for k, v in value.iteritems())
-    elif isinstance(value, unicode):
+        ret = dict((str(k), transform_rec(v)) for k, v in value.items())
+    elif isinstance(value, str):
         ret = to_unicode(value)
     elif isinstance(value, str):
         try:
             ret = str(value.decode('utf-8').encode('utf-8'))
         except:
             ret = to_unicode(value)
-    elif not isinstance(value, (ClassType, TypeType)) and \
+    elif not isinstance(value, (type(_C), type)) and \
             has_sentry_metadata(value):
         ret = transform_rec(value.__sentry__())
     elif isinstance(value, Promise):
@@ -147,7 +150,7 @@ def transform(value, stack=[], context=None):
         except:
             # It's common case that a model's __unicode__ definition may try to query the database
             # which if it was not cleaned up correctly, would hit a transaction aborted exception
-            ret = u'<BadRepr: %s>' % type(value)
+            ret = '<BadRepr: %s>' % type(value)
     else:
         ret = value
     del context[objid]
@@ -155,7 +158,7 @@ def transform(value, stack=[], context=None):
 
 def to_unicode(value):
     try:
-        value = unicode(force_unicode(value))
+        value = str(value)
     except (UnicodeEncodeError, UnicodeDecodeError):
         value = '(Error decoding value)'
     except Exception: # in some cases we get a different exception
@@ -248,7 +251,7 @@ def get_versions(module_list=None):
     ext_module_list = set()
     for m in module_list:
         parts = m.split('.')
-        ext_module_list.update('.'.join(parts[:idx]) for idx in xrange(1, len(parts)+1))
+        ext_module_list.update('.'.join(parts[:idx]) for idx in range(1, len(parts)+1))
 
     versions = {}
     for module_name in ext_module_list:
@@ -290,7 +293,7 @@ def get_versions(module_list=None):
 
 def shorten(var):
     var = transform(var)
-    if isinstance(var, basestring) and len(var) > settings.MAX_LENGTH_STRING:
+    if isinstance(var, str) and len(var) > settings.MAX_LENGTH_STRING:
         var = var[:settings.MAX_LENGTH_STRING] + '...'
     elif isinstance(var, (list, tuple, set, frozenset)) and len(var) > settings.MAX_LENGTH_LIST:
         # TODO: we should write a real API for storing some metadata with vars when
@@ -317,7 +320,7 @@ def get_auth_header(signature, timestamp, client):
     )
 
 def parse_auth_header(header):
-    return dict(map(lambda x: x.strip().split('='), header.split(' ', 1)[1].split(',')))
+    return dict([x.strip().split('=') for x in header.split(' ', 1)[1].split(',')])
 
 class MockDjangoRequest(HttpRequest):
     GET = {}

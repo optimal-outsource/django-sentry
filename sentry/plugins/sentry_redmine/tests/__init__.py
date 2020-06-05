@@ -35,7 +35,7 @@ class CreateIssueTest(TestCase):
         group = GroupedMessage.objects.all()[0]
 
         response = self.client.get(CreateRedmineIssue.get_url(group.pk))
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sentry/plugins/redmine/create_issue.html')
 
     def test_anonymous_issue_creation(self):
@@ -48,7 +48,7 @@ class CreateIssueTest(TestCase):
             'subject': 'test',
             'description': 'foo',
         }, follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sentry/group/details.html')
 
         self.assertTrue(RedmineIssue.objects.filter(group=group).exists())
@@ -66,7 +66,7 @@ class CreateIssueTest(TestCase):
             'subject': 'test',
             'description': 'foo',
         }, follow=True)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'sentry/group/details.html')
 
         self.assertTrue(RedmineIssue.objects.filter(group=group).exists())

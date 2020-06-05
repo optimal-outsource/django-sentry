@@ -17,7 +17,7 @@ import warnings
 
 # Some sane overrides to better mix with Django
 DEBUG = getattr(settings, 'DEBUG', False) and not getattr(settings, 'SENTRY_TESTING', False)
-KEY = getattr(settings, 'SENTRY_KEY', md5(settings.SECRET_KEY).hexdigest())
+KEY = getattr(settings, 'SENTRY_KEY', md5(settings.SECRET_KEY.encode('utf-8')).hexdigest())
 EMAIL_SUBJECT_PREFIX = getattr(settings, 'EMAIL_SUBJECT_PREFIX', EMAIL_SUBJECT_PREFIX)
 INTERNAL_IPS = getattr(settings, 'INTERNAL_IPS', INTERNAL_IPS)
 SERVER_EMAIL = getattr(settings, 'SERVER_EMAIL', SERVER_EMAIL)
@@ -29,7 +29,7 @@ for k in dir(settings):
 LOG_LEVELS = [(k, _(v)) for k, v in LOG_LEVELS]
 
 if locals().get('REMOTE_URL'):
-    if isinstance(REMOTE_URL, basestring):
+    if isinstance(REMOTE_URL, str):
         SERVERS = [REMOTE_URL]
     elif not isinstance(REMOTE_URL, (list, tuple)):
         raise ValueError("Sentry setting 'REMOTE_URL' must be of type list.")
@@ -38,7 +38,7 @@ if locals().get('REMOTE_TIMEOUT'):
     TIMEOUT = REMOTE_TIMEOUT
 
 def configure(**kwargs):
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
         if k.upper() != k:
             warnings.warn('Invalid setting, \'%s\' which is not defined by Sentry' % k)
         else:

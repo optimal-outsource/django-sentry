@@ -6,7 +6,7 @@ sentry.client.base
 :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import absolute_import
+
 
 import base64
 import datetime
@@ -15,7 +15,7 @@ import logging
 import sys
 import time
 import traceback
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import uuid
 import warnings
 
@@ -27,7 +27,7 @@ from django.template.loader import LoaderOrigin
 import sentry
 from sentry.conf import settings
 from sentry.utils import json
-from sentry.utils import construct_checksum, transform, get_installed_apps, force_unicode, \
+from sentry.utils import construct_checksum, transform, get_installed_apps, \
                            get_versions, shorten, get_signature, get_auth_header, varmap
 from sentry.utils.stacks import get_stack_info, iter_stack_frames, iter_traceback_frames
 
@@ -39,7 +39,7 @@ def fail_silently(default=None):
         def _wrapped(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception, e:
+            except Exception as e:
                 logger.exception(e)
                 return default
         return _wrapped
@@ -140,7 +140,7 @@ class SentryClient(object):
         kwargs['data']['__sentry__']['versions'] = versions
 
         # Shorten lists/strings
-        for k, v in kwargs['data'].iteritems():
+        for k, v in kwargs['data'].items():
             if k == '__sentry__':
                 continue
             kwargs['data'][k] = shorten(v)
@@ -184,7 +184,7 @@ class SentryClient(object):
         if kwargs.get('view'):
             # get list of modules from right to left
             parts = kwargs['view'].split('.')
-            module_list = ['.'.join(parts[:idx]) for idx in xrange(1, len(parts) + 1)][::-1]
+            module_list = ['.'.join(parts[:idx]) for idx in range(1, len(parts) + 1)][::-1]
             version = None
             module = None
             for m in module_list:
@@ -244,11 +244,11 @@ class SentryClient(object):
         return message_id
 
     def send_remote(self, url, data, headers={}):
-        req = urllib2.Request(url, headers=headers)
+        req = urllib.request.Request(url, headers=headers)
         try:
-            response = urllib2.urlopen(req, data, settings.REMOTE_TIMEOUT).read()
+            response = urllib.request.urlopen(req, data, settings.REMOTE_TIMEOUT).read()
         except:
-            response = urllib2.urlopen(req, data).read()
+            response = urllib.request.urlopen(req, data).read()
         return response
 
     def send(self, **kwargs):
@@ -265,12 +265,12 @@ class SentryClient(object):
 
                 try:
                     return self.send_remote(url=url, data=message, headers=headers)
-                except urllib2.HTTPError, e:
+                except urllib.error.HTTPError as e:
                     body = e.read()
                     logger.error('Unable to reach Sentry log server: %s (url: %%s, body: %%s)' % (e,), url, body,
                                  exc_info=True, extra={'data': {'body': body, 'remote_url': url}})
                     logger.log(kwargs.pop('level', None) or logging.ERROR, kwargs.pop('message', None))
-                except urllib2.URLError, e:
+                except urllib.error.URLError as e:
                     logger.error('Unable to reach Sentry log server: %s (url: %%s)' % (e,), url,
                                  exc_info=True, extra={'data': {'remote_url': url}})
                     logger.log(kwargs.pop('level', None) or logging.ERROR, kwargs.pop('message', None))
@@ -290,7 +290,7 @@ class SentryClient(object):
         kwargs.update({
             'logger': record.name,
             'level': record.levelno,
-            'message': force_unicode(record.msg),
+            'message': record.msg,
             'server_name': settings.NAME,
         })
 
@@ -374,7 +374,7 @@ class SentryClient(object):
 
             tb_message = '\n'.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
 
-            kwargs.setdefault('message', transform(force_unicode(exc_value)))
+            kwargs.setdefault('message', transform(exc_value))
 
             return self.process(
                 class_name=exc_type.__name__,
@@ -386,7 +386,7 @@ class SentryClient(object):
             if new_exc:
                 try:
                     del exc_info
-                except Exception, e:
+                except Exception as e:
                     logger.exception(e)
 
 class DummyClient(SentryClient):
