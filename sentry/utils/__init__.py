@@ -62,15 +62,15 @@ def get_db_engine(alias='default'):
         value = django_settings.DATABASE_ENGINE
     return value.rsplit('.', 1)[-1]
 
-def construct_checksum(level=logging.ERROR, class_name='', traceback='', message='', **kwargs):
-    checksum = md5(str(level))
-    checksum.update(class_name or '')
+def construct_checksum(level=logging.ERROR, class_name=b'', traceback='', message='', **kwargs):
+    checksum = md5(str(level).encode('utf-8'))
+    checksum.update(class_name.encode('utf-8') or b'')
 
     if 'data' in kwargs and kwargs['data'] and '__sentry__' in kwargs['data'] and 'frames' in kwargs['data']['__sentry__']:
         frames = kwargs['data']['__sentry__']['frames']
         for frame in frames:
-            checksum.update(frame['module'])
-            checksum.update(frame['function'])
+            checksum.update(frame['module'].encode('utf-8'))
+            checksum.update(frame['function'].encode('utf-8'))
 
     elif traceback:
         traceback = '\n'.join(traceback.split('\n')[:-3])
@@ -265,7 +265,13 @@ def get_versions(module_list=None):
             if hasattr(app, 'get_version'):
                 get_version = app.get_version
                 if callable(get_version):
-                    version = get_version()
+                    try:
+                        version = get_version()
+                    except TypeError:
+                        if hasattr(app, 'VERSION'):
+                            version = get_version(app.VERSION)
+                        else:
+                            version = None
                 else:
                     version = get_version
             elif hasattr(app, 'VERSION'):

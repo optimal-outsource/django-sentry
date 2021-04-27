@@ -63,7 +63,7 @@ class GzippedDictField(models.TextField):
     def get_prep_value(self, value):
         if value is None:
             return
-        return base64.b64encode(pickle.dumps(transform(value)).encode('zlib'))
+        return base64.b64encode(pickle.dumps(transform(value)))
 
     def to_python(self, value):
         if isinstance(value, str) and value:
