@@ -66,8 +66,12 @@ class GzippedDictField(models.TextField):
         return base64.b64encode(pickle.dumps(transform(value)))
 
     def to_python(self, value):
+        from pickle import UnpicklingError
+
         if isinstance(value, str) and value:
             try:
+                value = pickle.loads(base64.b64decode(value))
+            except UnpicklingError:
                 import zlib
                 value = pickle.loads(zlib.decompress(base64.b64decode(value)))
             except Exception as e:
