@@ -229,6 +229,9 @@ class SentryClient(object):
         if 'timestamp' not in kwargs:
             kwargs['timestamp'] = datetime.datetime.now()
 
+        if 'ORDER NUMBER' in kwargs['data']:
+            kwargs['order_number'] = kwargs['data']['ORDER NUMBER']
+
         self.send(**kwargs)
 
         if request:

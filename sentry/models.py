@@ -95,6 +95,7 @@ class MessageBase(Model):
     view = models.CharField(max_length=200, blank=True, null=True)
     checksum = models.CharField(max_length=32, db_index=True)
     data = GzippedDictField(blank=True, null=True)
+    order_number = models.CharField(blank=True, db_index=True, max_length=16, null=True)
 
     objects = SentryManager()
 

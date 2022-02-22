@@ -48,11 +48,9 @@ def sentry_exception_handler(request=None, **kwargs):
         if settings.DEBUG or getattr(exc_info[0], 'skip_sentry', False):
             return
 
-        extra = dict(
-            request=request,
-        )
+        kwargs.update({'request': request})
 
-        message_id = get_client().create_from_exception(**extra)
+        message_id = get_client().create_from_exception(**kwargs)
     except Exception as exc:
         try:
             logger.exception('Unable to process log entry: %s' % (exc,))
