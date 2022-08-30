@@ -119,10 +119,16 @@ class SentryManager(models.Manager):
 
             # The GroupedMessage model doesn't have sender or signal fields, so
             # perhaps Sentry was created before Django sent that information.
-            # To that end, we'll remove those two items so that the code
-            # doesn't try to save them to a model that doesn't have them.
-            del kwargs['sender']
-            del kwargs['signal']
+            # To that end, we'll remove those two items so that the code (if
+            # they exist) doesn't try to save them to a model that doesn't have them.
+            try:
+                del kwargs['sender']
+            except KeyError:
+                pass
+            try:
+                del kwargs['signal']
+            except KeyError:
+                pass
 
             group_kwargs = kwargs.copy()
             group_kwargs.update({
