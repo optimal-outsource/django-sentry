@@ -17,6 +17,7 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Sum
+from django.urls import reverse
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 
@@ -183,9 +184,8 @@ class GroupedMessage(MessageBase):
     def __unicode__(self):
         return "(%s) %s" % (self.times_seen, self.error())
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'sentry-group', (self.pk,), {}
+        return reverse('sentry-group', args=[self.pk])
 
     def natural_key(self):
         return self.logger, self.view, self.checksum
@@ -267,7 +267,7 @@ class GroupedMessage(MessageBase):
 
 class Message(MessageBase):
     message_id = models.CharField(max_length=32, null=True, unique=True)
-    group = models.ForeignKey(GroupedMessage, blank=True, null=True, related_name="message_set")
+    group = models.ForeignKey(GroupedMessage, blank=True, null=True, on_delete=models.CASCADE, related_name="message_set")
     datetime = models.DateTimeField(default=datetime.now, db_index=True)
     url = models.URLField(null=True, blank=True)
     server_name = models.CharField(max_length=128, db_index=True)
@@ -286,9 +286,8 @@ class Message(MessageBase):
             self.checksum = construct_checksum(**self.__dict__)
         super(Message, self).save(*args, **kwargs)
 
-    @models.permalink
     def get_absolute_url(self):
-        return 'sentry-group-message', (self.group_id, self.pk), {}
+        return reverse('sentry-group-message', args=[self.group_id, self.pk])
 
     def shortened_url(self):
         if not self.url:
@@ -352,7 +351,7 @@ class MessageFilterValue(models.Model):
     Stores the total number of messages seen by a group matching
     the given filter.
     """
-    group = models.ForeignKey(GroupedMessage)
+    group = models.ForeignKey(GroupedMessage, on_delete=models.CASCADE)
     times_seen = models.PositiveIntegerField(default=0)
     key = models.CharField(choices=FILTER_KEYS, max_length=32)
     value = models.CharField(max_length=200)
@@ -372,7 +371,7 @@ class MessageCountByMinute(Model):
     e.g. if it happened at 08:34:55 the time would be normalized to 08:30:00
     """
 
-    group = models.ForeignKey(GroupedMessage)
+    group = models.ForeignKey(GroupedMessage, on_delete=models.CASCADE)
     date = models.DateTimeField()   # normalized to HH:MM:00
     times_seen = models.PositiveIntegerField(default=0)
 

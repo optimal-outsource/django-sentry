@@ -7,7 +7,7 @@ sentry.plugins
 """
 
 # Based on http://martyalchin.com/2008/jan/10/simple-plugin-framework/
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 class PluginMount(type):
     def __init__(cls, name, bases, attrs):
