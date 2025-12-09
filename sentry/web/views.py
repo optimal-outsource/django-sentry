@@ -15,13 +15,13 @@ import warnings
 import zlib
 
 from django.conf import settings as dj_settings
-from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse, HttpResponseBadRequest, \
     HttpResponseForbidden, HttpResponseRedirect, Http404, HttpResponseNotModified, \
     HttpResponseGone
 from django.shortcuts import get_object_or_404
 from django.template.context_processors import csrf
 from django.template.loader import render_to_string
+from django.urls import reverse, resolve
 from django.utils.encoding import smart_str
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -297,7 +297,7 @@ def ajax_handler(request):
         GroupedMessage.objects.filter(pk=group.pk).update(status=1)
         group.status = 1
 
-        if not request.is_ajax():
+        if request.headers.get('x-requested-with') != 'XMLHttpRequest'
             return HttpResponseRedirect(request.META.get('HTTP_REFERER') or reverse('sentry'))
 
         data = [

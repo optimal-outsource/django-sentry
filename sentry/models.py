@@ -19,7 +19,7 @@ from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
 from django.utils.encoding import smart_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from sentry.conf import settings
 from sentry.utils import cached_property, construct_checksum, transform, get_filters, \
@@ -181,7 +181,7 @@ class GroupedMessage(MessageBase):
         )
         db_table = 'sentry_groupedmessage'
 
-    def __unicode__(self):
+    def __str__(self):
         return "(%s) %s" % (self.times_seen, self.error())
 
     def get_absolute_url(self):
@@ -278,7 +278,7 @@ class Message(MessageBase):
         verbose_name_plural = _('messages')
         db_table = 'sentry_message'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.error()
 
     def save(self, *args, **kwargs):
@@ -342,7 +342,7 @@ class FilterValue(models.Model):
     class Meta:
         unique_together = (('key', 'value'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'key=%s, value=%s' % (self.key, self.value)
 
 
@@ -359,7 +359,7 @@ class MessageFilterValue(models.Model):
     class Meta:
         unique_together = (('key', 'value', 'group'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'group_id=%s, times_seen=%s, key=%s, value=%s' % (self.group_id, self.times_seen,
                                                                   self.key, self.value)
 
@@ -378,7 +378,7 @@ class MessageCountByMinute(Model):
     class Meta:
         unique_together = (('group', 'date'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return 'group_id=%s, times_seen=%s, date=%s' % (self.group_id, self.times_seen, self.date)
 
 

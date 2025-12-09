@@ -8,10 +8,10 @@ sentry.plugins.sentry_redmine.models
 
 from django import forms
 from django.core.context_processors import csrf
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from sentry.models import GroupedMessage

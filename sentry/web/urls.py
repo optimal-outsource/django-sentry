@@ -6,7 +6,7 @@ sentry.web.urls
 :license: BSD, see LICENSE for more details.
 """
 
-from django.conf.urls import url
+from django.urls import path, re_path
 from django.views.defaults import page_not_found
 
 from sentry.web import views, feeds
@@ -33,28 +33,28 @@ def handler500(request):
 
 
 urlpatterns = [
-    url(r'^_static/(?P<path>.*)$', views.static_media, name='sentry-media'),
+    re_path(r'_static/(?P<path>.*)', views.static_media, name='sentry-media'),
 
     # Feeds
 
-    url(r'^feeds/messages.xml$', feeds.MessageFeed(), name='sentry-feed-messages'),
-    url(r'^feeds/summaries.xml$', feeds.SummaryFeed(), name='sentry-feed-summaries'),
+    path('feeds/messages.xml', feeds.MessageFeed(), name='sentry-feed-messages'),
+    path('feeds/summaries.xml', feeds.SummaryFeed(), name='sentry-feed-summaries'),
 
     # JS and API
 
-    url(r'^jsapi/$', views.ajax_handler, name='sentry-ajax'),
-    url(r'^store/$', views.store, name='sentry-store'),
+    path('jsapi/', views.ajax_handler, name='sentry-ajax'),
+    path('store/', views.store, name='sentry-store'),
 
     # Normal views
 
-    url(r'^login$', views.login, name='sentry-login'),
-    url(r'^logout$', views.logout, name='sentry-logout'),
-    url(r'^group/(\d+)$', views.group, name='sentry-group'),
-    url(r'^group/(\d+)/messages$', views.group_message_list, name='sentry-group-messages'),
-    url(r'^group/(\d+)/messages/(\d+)$', views.group_message_details, name='sentry-group-message'),
-    url(r'^group/(\d+)/actions/([\w_-]+)', views.group_plugin_action, name='sentry-group-plugin-action'),
+    path('login', views.login, name='sentry-login'),
+    path('logout', views.logout, name='sentry-logout'),
+    re_path(r'group/(\d+)', views.group, name='sentry-group'),
+    re_path(r'group/(\d+)/messages', views.group_message_list, name='sentry-group-messages'),
+    re_path(r'group/(\d+)/messages/(\d+)', views.group_message_details, name='sentry-group-message'),
+    re_path(r'group/(\d+)/actions/([\w_-]+)', views.group_plugin_action, name='sentry-group-plugin-action'),
 
-    url(r'^search$', views.search, name='sentry-search'),
+    path('search', views.search, name='sentry-search'),
 
-    url(r'^$', views.index, name='sentry'),
+    path('', views.index, name='sentry'),
 ]

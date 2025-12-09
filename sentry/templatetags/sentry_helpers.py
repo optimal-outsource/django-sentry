@@ -4,7 +4,7 @@ from django import template
 from django.template.defaultfilters import stringfilter
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from paging.helpers import paginate as paginate_func
 from sentry.plugins import GroupActionProvider
 from sentry.utils import json

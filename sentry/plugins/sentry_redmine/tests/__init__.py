@@ -11,8 +11,8 @@ Note: this does not test with API_KEY as that only works under a modified Redmin
 """
 
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 
 from sentry.models import GroupedMessage
 from sentry.plugins.sentry_redmine import conf

@@ -148,7 +148,7 @@ def transform(value, stack=[], context=None):
         try:
             ret = transform(repr(value))
         except:
-            # It's common case that a model's __unicode__ definition may try to query the database
+            # It's common case that a model's __str__ definition may try to query the database
             # which if it was not cleaned up correctly, would hit a transaction aborted exception
             ret = '<BadRepr: %s>' % type(value)
     else:

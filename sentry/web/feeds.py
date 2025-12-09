@@ -6,10 +6,10 @@ sentry.web.feeds
 :license: BSD, see LICENSE for more details.
 """
 
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils import feedgenerator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from sentry.models import Message, GroupedMessage
 

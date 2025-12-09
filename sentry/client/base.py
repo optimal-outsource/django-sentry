@@ -21,8 +21,7 @@ import warnings
 
 from django.core.cache import cache
 from django.http import HttpRequest
-from django.template import TemplateSyntaxError
-from django.template.loader import LoaderOrigin
+from django.template import Origin, TemplateSyntaxError
 
 import sentry
 from sentry.conf import settings
