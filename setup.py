@@ -36,7 +36,7 @@ if sys.version_info[:2] < (2, 5):
 
 setup(
     name='django-sentry',
-    version='1.16.1',
+    version='1.16.2',
     author='Adam Stein',
     author_email='adam@optimaloutsource.com',
     url='https://github.com/optimal-outsource/django-sentry',
