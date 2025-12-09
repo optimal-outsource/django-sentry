@@ -297,7 +297,7 @@ def ajax_handler(request):
         GroupedMessage.objects.filter(pk=group.pk).update(status=1)
         group.status = 1
 
-        if request.headers.get('x-requested-with') != 'XMLHttpRequest'
+        if request.headers.get('x-requested-with') != 'XMLHttpRequest':
             return HttpResponseRedirect(request.META.get('HTTP_REFERER') or reverse('sentry'))
 
         data = [
