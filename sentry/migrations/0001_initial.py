@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                 ('url', models.URLField(null=True, blank=True)),
                 ('server_name', models.CharField(max_length=128, db_index=True)),
                 ('site', models.CharField(max_length=128, null=True, db_index=True)),
-                ('group', models.ForeignKey(related_name=b'message_set', blank=True, to='sentry.GroupedMessage', null=True)),
+                ('group', models.ForeignKey(related_name='message_set', blank=True, on_delete=models.CASCADE, to='sentry.GroupedMessage', null=True)),
             ],
             options={
                 'db_table': 'sentry_message',
@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('date', models.DateTimeField()),
                 ('times_seen', models.PositiveIntegerField(default=0)),
-                ('group', models.ForeignKey(to='sentry.GroupedMessage')),
+                ('group', models.ForeignKey(to='sentry.GroupedMessage', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
                 ('times_seen', models.PositiveIntegerField(default=0)),
                 ('key', models.CharField(max_length=32, choices=[(b'server_name', 'server name'), (b'logger', 'logger'), (b'site', 'site')])),
                 ('value', models.CharField(max_length=200)),
-                ('group', models.ForeignKey(to='sentry.GroupedMessage')),
+                ('group', models.ForeignKey(to='sentry.GroupedMessage', on_delete=models.CASCADE)),
             ],
             options={
             },

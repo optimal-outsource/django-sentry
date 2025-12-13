@@ -12,8 +12,8 @@ from django.views.defaults import page_not_found
 from sentry.web import views, feeds
 
 
-def handler404(request):
-    page_not_found(request, template_name='sentry/404.html')
+def handler404(request, exception, template_name='sentry/404.html'):
+        return page_not_found(request, exception, template_name=template_name)
 
 
 def handler500(request):
