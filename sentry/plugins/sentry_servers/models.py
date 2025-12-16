@@ -6,7 +6,7 @@ sentry.plugins.sentry_servers.models
 :license: BSD, see LICENSE for more details.
 """
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template.loader import render_to_string
 
 from sentry.plugins import GroupActionProvider
@@ -25,7 +25,7 @@ class ServerGroupPanel(GroupActionProvider):
         return panel_list
 
     def view(self, request, group):
-        return render_to_response('sentry/plugins/sentry_servers/index.html', locals())
+        return render(request, 'sentry/plugins/sentry_servers/index.html', locals())
     
     def widget(self, request, group):
         return render_to_string('sentry/plugins/sentry_servers/widget.html', locals())
