@@ -18,7 +18,7 @@ from datetime import datetime
 from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from django.utils.translation import gettext_lazy as _
 
 from sentry.conf import settings
@@ -141,7 +141,7 @@ class MessageBase(Model):
 
     def error(self):
         if self.message:
-            message = smart_text(self.message)
+            message = smart_str(self.message)
             if len(message) > 100:
                 message = message[:97] + '...'
             if self.class_name:
