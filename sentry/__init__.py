@@ -7,7 +7,10 @@ sentry
 """
 
 try:
-    VERSION = __import__('pkg_resources') \
-        .get_distribution('django-sentry').version
-except Exception as e:
-    VERSION = 'unknown'
+    from importlib.metadata import version, PackageNotFoundError
+    VERSION = version("django-sentry")
+except PackageNotFoundError:
+        VERSION = "unknown"
+except Exception:
+        VERSION = "unknown"
+

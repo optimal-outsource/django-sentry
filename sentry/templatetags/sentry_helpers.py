@@ -1,11 +1,9 @@
-# XXX: Import django-paging's template tags so we dont have to worry about
-#      INSTALLED_APPS
 from django import template
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.defaultfilters import stringfilter
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-from paging.helpers import paginate as paginate_func
 from sentry.plugins import GroupActionProvider
 from sentry.utils import json
 from templatetag_sugar.register import tag
@@ -165,20 +163,49 @@ def truncatechars(value, arg):
     return value
 truncatechars.is_safe = True
 
-# XXX: this is taken from django-paging so that we may render
-#      a custom template, and not worry about INSTALLED_APPS
-@tag(register, [Variable('queryset_or_list'),
-                Constant('from'), Variable('request'),
-                Optional([Constant('as'), Name('asvar')]),
-                Optional([Constant('per_page'), Variable('per_page')]),
-                Optional([Variable('is_endless')])])
-def paginate(context, queryset_or_list, request, asvar, per_page=25, is_endless=True):
-    """{% paginate queryset_or_list from request as foo[ per_page 25][ is_endless False %}"""
-    paging_context = paginate_func(request, queryset_or_list, per_page, endless=is_endless)
-    paging = mark_safe(render_to_string('sentry/partial/_pager.html', paging_context, request))
+def paginate(context, queryset_or_list, request, asvar=None, per_page=25, is_endless=True):
+    """
+    Replacement for django-pagination's paginate helper.
+    
+    Usage in templates:
+        {% paginate queryset_or_list from request as foo %}
+    
+    Returns a dict:
+        {
+            'objects': page_obj.object_list,
+            'paging': rendered HTML for pager
+        }
+    """
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(queryset_or_list, per_page)
 
-    result = dict(objects=paging_context['paginator'].get('objects', []), paging=paging)
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # For endless pagination, optionally return the last page
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Prepare the context for the pager template
+    paging_context = {
+        'paginator': paginator,
+        'page_obj': page_obj,
+        'is_endless': is_endless,
+        'request': request,
+    }
+
+    # Render the pager HTML (you can reuse your old template)
+    paging = mark_safe(render_to_string('sentry/partial/_pager.html', paging_context, request=request))
+
+    result = {
+        'objects': page_obj.object_list,
+        'paging': paging,
+    }
+
     if asvar:
         context[asvar] = result
         return ''
+
     return result
+

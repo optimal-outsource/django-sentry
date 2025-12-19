@@ -23,7 +23,6 @@ tests_require = [
 
 install_requires = [
     'Django>=1.9',
-    'django-paging>=0.3',
     'django-indexer>=0.3.0',
     'django-templatetag-sugar>=1.1',
     'raven',
@@ -36,7 +35,7 @@ if sys.version_info[:2] < (2, 5):
 
 setup(
     name='django-sentry',
-    version='1.18.0',
+    version='1.19.0',
     author='Adam Stein',
     author_email='adam@optimaloutsource.com',
     url='https://github.com/optimal-outsource/django-sentry',

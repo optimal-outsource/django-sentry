@@ -8,10 +8,6 @@ sentry.utils
 
 import hmac
 import logging
-try:
-    import pkg_resources
-except ImportError:
-    pkg_resources = None
 import sys
 import uuid
 from pprint import pformat
@@ -278,12 +274,6 @@ def get_versions(module_list=None):
                 version = app.VERSION
             elif hasattr(app, '__version__'):
                 version = app.__version__
-            elif pkg_resources:
-                # pull version from pkg_resources if distro exists
-                try:
-                    version = pkg_resources.get_distribution(module_name).version
-                except pkg_resources.DistributionNotFound:
-                    version = None
             else:
                 version = None
 
